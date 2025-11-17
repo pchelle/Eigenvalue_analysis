@@ -67,7 +67,6 @@ jobs:
           chmod +x "molecular simulations/runMin.sh"
           chmod +x "molecular simulations/remin.sh"
           echo "Run Amber scripts"
-          "./molecular simulations/no_conect.sh"
           "./molecular simulations/auto-antechamber.sh"
           "./molecular simulations/autoleap.sh"
           "./molecular simulations/runMin.sh"
