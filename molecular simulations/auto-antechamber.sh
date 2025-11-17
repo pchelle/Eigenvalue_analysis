@@ -1,5 +1,5 @@
 #!/bin/bash
-AMBERHOME=/opt/amber16
+AMBERHOME=/usr/share/miniconda/envs/amber
 source $AMBERHOME/amber.sh
 ANTE_CHAMBER=$AMBERHOME/bin/antechamber
 lig_charges=0
