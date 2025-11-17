@@ -46,242 +46,56 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      
+      - name: Install Amber
+        uses: psibi/setup-amber@v2.0.0
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
           pip install numpy pandas matplotlib scikit-learn mlxtend
-      
       - name: Set up R
         uses: r-lib/actions/setup-r@v2
         with:
           r-version: '4.3.0'
       
-      - name: Display EVANS Information
-        run: |
-          echo "=== EVANS Pipeline ==="
-          echo "EigenValue ANalySis (EVANS) - A chirality-sensitive 3D QSPR methodology"
-          echo ""
-          echo "Pipeline Steps:"
-          echo "1. Molecular Simulations (AMBER scripts)"
-          echo "2. Distance Calculation (VMD script)"
-          echo "3. Matrix Generation and Processing"
-          echo "4. Eigenvalue Calculation (R script)"
-          echo "5. ML Model Building (Python scripts)"
-          echo ""
-          echo "Repository Structure:"
-          ls -la
-      
-      - name: Verify EVANS Scripts
-        run: |
-          echo "=== Verifying EVANS components ==="
-          
-          echo "Molecular Simulations Scripts:"
-          ls -la "molecular simulations/" || echo "Warning: molecular simulations directory not found"
-          
-          echo ""
-          echo "Distance Calculation Script:"
-          ls -la "Distance calculation/" || echo "Warning: Distance calculation directory not found"
-          
-          echo ""
-          echo "Matrix Generation Tools:"
-          ls -la "matrix generation and processing/" || echo "Warning: matrix generation directory not found"
-          
-          echo ""
-          echo "Eigenvalue Descriptor Script:"
-          ls -la "Eigenvalue descriptors/" || echo "Warning: Eigenvalue descriptors directory not found"
-          
-          echo ""
-          echo "ML Model Building Scripts:"
-          ls -la "ML model building/" || echo "Warning: ML model building directory not found"
-      
       - name: Step 1 - Molecular Simulations (AMBER)
         if: ${{ github.event.inputs.run_simulations != 'false' }}
         run: |
-          echo "=== Step 1: Molecular Simulations ==="
-          echo "This step performs molecular dynamics simulations using AMBER."
-          echo ""
-          echo "Scripts available:"
-          echo "  - no_conect.sh: Removes CONECT records from input structures"
-          echo "  - auto-antechamber.sh: Ligand parametrization"
-          echo "  - autoleap.sh: Creates topologies in AMBER format"
-          echo "  - runMin.sh: Runs equilibration MD simulation protocol"
-          echo "  - remin.sh: Trajectory analysis and reminimization"
-          echo ""
-          echo "Note: This requires AMBER software to be installed."
-          echo "For actual execution, install AmberTools and run the scripts in 'molecular simulations/' directory"
-          
-          # Check if scripts are executable
-          if [ -d "molecular simulations" ]; then
-            cd "molecular simulations"
-            for script in *.sh; do
-              if [ -f "$script" ]; then
-                echo "Found: $script"
-                chmod +x "$script" || true
-              fi
-            done
-            cd ..
-          fi
+          echo "Make Amber scripts as executable"
+          chmod +x "molecular simulations/no_conect.sh"
+          chmod +x "molecular simulations/auto-antechamber.sh"
+          chmod +x "molecular simulations/autoleap.sh"
+          chmod +x "molecular simulations/runMin.sh"
+          chmod +x "molecular simulations/remin.sh"
+          echo "Run Amber scripts"
+          -e "./molecular simulations/no_conect.sh"
+          -e "./molecular simulations/auto-antechamber.sh"
+          -e "./molecular simulations/autoleap.sh"
+          -e "./molecular simulations/runMin.sh"
+          -e "./molecular simulations/remin.sh"
       
       - name: Step 2 - Distance Calculation (VMD)
         if: ${{ github.event.inputs.run_distance_calc != 'false' }}
         run: |
-          echo "=== Step 2: Distance Calculation ==="
-          echo "This step calculates interatomic distances using VMD."
-          echo ""
-          echo "Script: dist_CentBond-CentMol.tcl"
-          echo "Purpose: Computes molecular interatomic distances between each atom pair"
-          echo "         and the centroid of the molecules"
-          echo ""
-          echo "Note: This requires VMD (Visual Molecular Dynamics) to be installed."
-          echo "For actual execution, install VMD and run:"
-          echo "  vmd -dispdev text -e 'Distance calculation/dist_CentBond-CentMol.tcl'"
-          
-          if [ -f "Distance calculation/dist_CentBond-CentMol.tcl" ]; then
-            echo "VMD script found and ready for use"
-          fi
+          echo "Make VMD script as executable"
+          chmod +x "Distance calculation/dist_CentBond-CentMol.tcl"
+          echo "Run VMD script"
+          -e "./Distance calculation/dist_CentBond-CentMol.tcl"
       
       - name: Step 3 - Matrix Generation and Processing
         run: |
-          echo "=== Step 3: Matrix Generation and Processing ==="
-          echo "This step generates distance matrices and integrates physicochemical properties."
-          echo ""
-          echo "Tool: Evans_v2020.1.xlsm (Excel macro)"
-          echo "Tasks:"
-          echo "  - Canonical numbering using Morgan algorithm"
-          echo "  - Distance matrix generation"
-          echo "  - Physicochemical property-integrated distance matrix generation"
-          echo "  - Diagonalization to generate covariance matrices"
-          echo ""
-          echo "Note: This step uses an Excel macro which requires Microsoft Excel or LibreOffice."
-          echo "The macro file is located in 'matrix generation and processing/' directory"
-          
-          if [ -f "matrix generation and processing/Evans_v2020.1.xlsm" ]; then
-            echo "Excel macro file found"
-          fi
+          echo "Make VMD script as executable"
+          chmod +x "matrix generation and processing/Evans_v2020.1.xlsm"
+          echo "Run VMD script"
+          -e "./matrix generation and processing/Evans_v2020.1.xlsm"
       
       - name: Step 4 - Eigenvalue Calculation (R)
         if: ${{ github.event.inputs.run_eigenvalue_calc != 'false' }}
         run: |
-          echo "=== Step 4: Eigenvalue Calculation ==="
-          echo "This step computes eigenvalues from covariance matrices using R."
-          echo ""
-          
-          if [ -f "Eigenvalue descriptors/newCoVarMats_2_eigen_tab.r" ]; then
-            echo "R script found: newCoVarMats_2_eigen_tab.r"
-            echo ""
-            echo "This script:"
-            echo "  - Reads covariance matrices from CSV files"
-            echo "  - Computes eigenvalues and eigenvectors"
-            echo "  - Generates eigenvalue descriptors for QSAR/QSPR modeling"
-            echo ""
-            
-            # For demonstration, show the script exists
-            cd "Eigenvalue descriptors"
-            echo "Script contents preview:"
-            head -20 newCoVarMats_2_eigen_tab.r
-            cd ..
-            
-            echo ""
-            echo "To execute with actual data, place CoVarMat CSV files in the directory and run:"
-            echo "  Rscript Eigenvalue\ descriptors/newCoVarMats_2_eigen_tab.r"
-          else
-            echo "Warning: R script not found"
-          fi
+          -e Rscript "./Eigenvalue descriptors/newCoVarMats_2_eigen_tab.r"
       
       - name: Step 5 - ML Model Building (Python)
         if: ${{ github.event.inputs.run_ml_model != 'false' }}
         run: |
-          echo "=== Step 5: ML Model Building ==="
-          echo "This step builds machine learning models using Python."
-          echo ""
+          -e python "./ML model building/classification.py"
+          -e python "./ML model building/regression.py"
           
-          if [ -f "ML model building/classification.py" ] && [ -f "ML model building/regression.py" ]; then
-            echo "Python ML scripts found:"
-            echo "  - classification.py: For classification tasks"
-            echo "  - regression.py: For regression tasks"
-            echo ""
-            echo "These scripts use:"
-            echo "  - scikit-learn for ML algorithms"
-            echo "  - mlxtend for feature selection"
-            echo "  - pandas for data handling"
-            echo "  - numpy for numerical operations"
-            echo ""
-            
-            # Check Python syntax
-            echo "Validating Python scripts..."
-            python -m py_compile "ML model building/classification.py" && echo "✓ classification.py syntax OK" || echo "✗ classification.py has syntax issues"
-            python -m py_compile "ML model building/regression.py" && echo "✓ regression.py syntax OK" || echo "✗ regression.py has syntax issues"
-            
-            echo ""
-            echo "To execute with actual data:"
-            echo "  python ML\ model\ building/classification.py"
-            echo "  python ML\ model\ building/regression.py"
-          else
-            echo "Warning: Python ML scripts not found"
-          fi
-      
-      - name: Pipeline Summary
-        run: |
-          echo "=== EVANS Pipeline Execution Summary ==="
-          echo ""
-          echo "✓ Repository structure verified"
-          echo "✓ Python dependencies installed"
-          echo "✓ R environment configured"
-          echo "✓ All EVANS scripts are present and validated"
-          echo ""
-          echo "The EVANS pipeline is ready for use with actual molecular data."
-          echo ""
-          echo "For complete execution, you will need:"
-          echo "  1. AMBER or AmberTools for molecular simulations"
-          echo "  2. VMD for distance calculations"
-          echo "  3. Excel/LibreOffice for matrix generation"
-          echo "  4. R for eigenvalue calculations"
-          echo "  5. Python with ML libraries for model building"
-          echo ""
-          echo "Refer to EVANS manual.pdf for detailed instructions."
-      
-      - name: Upload EVANS Manual
-        uses: actions/upload-artifact@v4
-        with:
-          name: evans-manual
-          path: EVANS manual.pdf
-          retention-days: 30
-      
-      - name: Generate Pipeline Report
-        run: |
-          cat > evans_pipeline_report.txt << 'EOF'
-          EVANS Pipeline Execution Report
-          ================================
-          
-          Date: $(date)
-          
-          Pipeline Steps Completed:
-          1. ✓ Molecular Simulations scripts verified
-          2. ✓ Distance Calculation script verified
-          3. ✓ Matrix Generation tools verified
-          4. ✓ Eigenvalue Calculation script verified
-          5. ✓ ML Model Building scripts verified
-          
-          Dependencies Installed:
-          - Python 3.11 with numpy, pandas, scikit-learn, mlxtend
-          - R 4.3.0
-          
-          Next Steps:
-          - Provide input molecular structures
-          - Run molecular simulations with AMBER
-          - Calculate distances with VMD
-          - Process matrices and compute eigenvalues
-          - Build ML models with the generated descriptors
-          
-          For detailed instructions, refer to EVANS manual.pdf
-          EOF
-          
-          cat evans_pipeline_report.txt
-      
-      - name: Upload Pipeline Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: pipeline-report
-          path: evans_pipeline_report.txt
-          retention-days: 30
