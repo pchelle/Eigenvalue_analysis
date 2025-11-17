@@ -67,11 +67,11 @@ jobs:
           chmod +x "molecular simulations/runMin.sh"
           chmod +x "molecular simulations/remin.sh"
           echo "Run Amber scripts"
-          -e "./molecular simulations/no_conect.sh"
-          -e "./molecular simulations/auto-antechamber.sh"
-          -e "./molecular simulations/autoleap.sh"
-          -e "./molecular simulations/runMin.sh"
-          -e "./molecular simulations/remin.sh"
+          "./molecular simulations/no_conect.sh"
+          "./molecular simulations/auto-antechamber.sh"
+          "./molecular simulations/autoleap.sh"
+          "./molecular simulations/runMin.sh"
+          "./molecular simulations/remin.sh"
       
       - name: Step 2 - Distance Calculation (VMD)
         if: ${{ github.event.inputs.run_distance_calc != 'false' }}
@@ -79,7 +79,7 @@ jobs:
           echo "Make VMD script as executable"
           chmod +x "Distance calculation/dist_CentBond-CentMol.tcl"
           echo "Run VMD script"
-          -e "./Distance calculation/dist_CentBond-CentMol.tcl"
+          "./Distance calculation/dist_CentBond-CentMol.tcl"
       
       - name: Step 3 - Matrix Generation and Processing
         run: |
