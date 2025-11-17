@@ -46,14 +46,17 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Install Amber
-        shell: bash
-        run: |
-          conda create -n amber -c conda-forge ambertools=23
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
           pip install numpy pandas matplotlib scikit-learn mlxtend
+      - name: Install Amber
+        shell: bash
+        run: |
+          conda install -c bioconda "biobb_amber>=5.1.0"
+          conda install -c bioconda "biobb_structure_utils>=5.1.0"
+          singularity exec biobb_structure_utils.sif "remove_pdb_water -i ./ligs/4ZA9.pdb -o ./ligs/4ZA9_noH.pdb"
+      
       - name: Set up R
         uses: r-lib/actions/setup-r@v2
         with:
